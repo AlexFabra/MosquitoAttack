@@ -1,4 +1,5 @@
 package cat.dam.alex.mosquitoattack;
+import android.graphics.Rect;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,7 +21,9 @@ public class SegonaActivity extends AppCompatActivity {
     boolean mosquitoLiving=true;
     Handler handler = new Handler(); //per pausar
     Runnable runnable;
+    Runnable runnablePaused;
     int mosquitoFlyingVelocity= 300;
+    int pause = 1500;
 
     //@RequiresApi(api = Build.VERSION_CODES.P)
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +41,7 @@ public class SegonaActivity extends AppCompatActivity {
         iv_mosquit.setX(100);
         iv_mosquit.setY(150);
         setMosquitoImage();
+        mosquitoAlive();
 
         iv_mosquit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -45,16 +49,9 @@ public class SegonaActivity extends AppCompatActivity {
                 setBloodImage();
                 handler.removeCallbacks(runnable); //per parar el runnable.
                 incrementScore();
-                handler.postDelayed(new Runnable() {
-                    public void run() {
-                        System.out.println("Pausa");
-                        setMosquitoImage();
-                        mosquitoAlive();
-                    }
-                }, 1000);
+                restartMosquito();
             }
         });
-    mosquitoAlive();
     }
     public void setMosquitoImage(){
         iv_mosquit.setBackgroundResource(R.drawable.mosquit_animat);
@@ -81,6 +78,15 @@ public class SegonaActivity extends AppCompatActivity {
             }
         }, mosquitoFlyingVelocity);
     }
+    public void restartMosquito(){
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                System.out.println("Pausa");
+                setMosquitoImage();
+                mosquitoAlive();
+            }
+        }, pause);
+    }
     public void incrementScore(){
         points+=1;
         setScore(points);
@@ -91,5 +97,10 @@ public class SegonaActivity extends AppCompatActivity {
     }
     public void setScore(int points){
         tv_scorepoints.setText(Integer.toString(points));
+    }
+    public void restart(View restart){
+        handler.removeCallbacks(runnable); //per parar el runnable.
+        restartScore();
+        restartMosquito();
     }
 }
