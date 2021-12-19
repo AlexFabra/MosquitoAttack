@@ -1,15 +1,14 @@
 package cat.dam.alex.mosquitoattack;
 import android.graphics.drawable.AnimationDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
-import androidx.annotation.RequiresApi;
+
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.Random;
 
 public class SegonaActivity extends AppCompatActivity {
 
@@ -17,8 +16,13 @@ public class SegonaActivity extends AppCompatActivity {
     private int points=0;
     ImageView iv_mosquit;
     AnimationDrawable mosquit_animat;
+    Random rand = new Random();
+    boolean mosquitoLiving=true;
+    Handler handler = new Handler(); //per pausar
+    Runnable runnable;
+    int mosquitoFlyingVelocity= 300;
 
-    @RequiresApi(api = Build.VERSION_CODES.P)
+    //@RequiresApi(api = Build.VERSION_CODES.P)
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_segona);
@@ -33,30 +37,59 @@ public class SegonaActivity extends AppCompatActivity {
         // Situem la imatge en la pantalla
         iv_mosquit.setX(100);
         iv_mosquit.setY(150);
+        setMosquitoImage();
+
+        iv_mosquit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setBloodImage();
+                handler.removeCallbacks(runnable); //per parar el runnable.
+                incrementScore();
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+                        System.out.println("Pausa");
+                        setMosquitoImage();
+                        mosquitoAlive();
+                    }
+                }, 1000);
+            }
+        });
+    mosquitoAlive();
+    }
+    public void setMosquitoImage(){
         iv_mosquit.setBackgroundResource(R.drawable.mosquit_animat);
         // Obté el fons que ha estat compilat amb un objecte AnimationDrawable
         mosquit_animat = (AnimationDrawable) iv_mosquit.getBackground();
         // Comença l'animació (per defecte repetició de cicle).
         mosquit_animat.start();
-
-        iv_mosquit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // En cas de que es cliqui el mosquit actualiza el fons d'imatge amb el recurs XML on es defineix les imatges
-                // i temps d'animació de la taca de sang
-                iv_mosquit.setBackgroundResource(R.drawable.sang_animat);
-                mosquit_animat = (AnimationDrawable) iv_mosquit.getBackground();
-                // Fes l'animació (només un cicle).
-                mosquit_animat.start();
-            }
-        });
-        Handler handler = new Handler(); //per pausar
-        handler.postDelayed(new Runnable(){
-            public void run(){
-                iv_mosquit.setX(200);
-                iv_mosquit.setY(250);
-            }
-        }, 2000);
     }
-
+    public void setBloodImage(){
+        // En cas de que es cliqui el mosquit actualiza el fons d'imatge amb el recurs XML on es defineix les imatges
+        // i temps d'animació de la taca de sang
+        iv_mosquit.setBackgroundResource(R.drawable.sang_animat);
+        mosquit_animat = (AnimationDrawable) iv_mosquit.getBackground();
+        System.out.println(iv_mosquit.getBackground());
+        // Fes l'animació (només un cicle).
+        mosquit_animat.start();
+    }
+    public void mosquitoAlive(){
+        handler.postDelayed(runnable = new Runnable(){
+            public void run(){
+                iv_mosquit.setX(rand.nextInt(500));
+                iv_mosquit.setY(rand.nextInt(500));
+                handler.postDelayed(this, mosquitoFlyingVelocity);
+            }
+        }, mosquitoFlyingVelocity);
+    }
+    public void incrementScore(){
+        points+=1;
+        setScore(points);
+    }
+    public void restartScore(){
+        points=0;
+        setScore(points);
+    }
+    public void setScore(int points){
+        tv_scorepoints.setText(Integer.toString(points));
+    }
 }
