@@ -1,5 +1,4 @@
 package cat.dam.alex.mosquitoattack;
-import android.graphics.Rect;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,12 +17,12 @@ public class SegonaActivity extends AppCompatActivity {
     ImageView iv_mosquit;
     AnimationDrawable mosquit_animat;
     Random rand = new Random();
-    boolean mosquitoLiving=true;
     Handler handler = new Handler(); //per pausar
     Runnable runnable;
     Runnable runnablePaused;
     int mosquitoFlyingVelocity= 300;
     int pause = 1500;
+    boolean isAlive=true;
 
     //@RequiresApi(api = Build.VERSION_CODES.P)
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,13 +42,18 @@ public class SegonaActivity extends AppCompatActivity {
         setMosquitoImage();
         mosquitoAlive();
 
+
         iv_mosquit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setBloodImage();
-                handler.removeCallbacks(runnable); //per parar el runnable.
-                incrementScore();
-                restartMosquito();
+                if(isAlive){
+                    setBloodImage();
+                    handler.removeCallbacks(runnable); //per parar el runnable.
+                    handler.removeCallbacks(runnablePaused);
+                    incrementScore();
+                    isAlive=false;
+                    restartMosquito();
+                }
             }
         });
     }
@@ -79,10 +83,11 @@ public class SegonaActivity extends AppCompatActivity {
         }, mosquitoFlyingVelocity);
     }
     public void restartMosquito(){
-        handler.postDelayed(new Runnable() {
+        handler.postDelayed(runnablePaused= new Runnable() {
             public void run() {
                 System.out.println("Pausa");
                 setMosquitoImage();
+                isAlive=true;
                 mosquitoAlive();
             }
         }, pause);
@@ -100,6 +105,7 @@ public class SegonaActivity extends AppCompatActivity {
     }
     public void restart(View restart){
         handler.removeCallbacks(runnable); //per parar el runnable.
+        handler.removeCallbacks(runnablePaused);
         restartScore();
         restartMosquito();
     }
